@@ -26,32 +26,88 @@ namespace FileSplitter
             var dirIN = new DirectoryInfo(@inDir); //папка с входящими файлами 
             var dirOUT = new DirectoryInfo(@outDir); //папка с исходящими файлами  
             string fileName = "";
-            int count = 0;
+            int linesCount = 0;
+            int fileCount = 0;
+
 
             foreach (FileInfo file in dirIN.GetFiles())
             {
                 string[] curentFile;
+                int outFileNum = 0;
+                string outFileName = "";
+                string[] buffer = new String[linesQ];
                 fileName = Path.GetFileName(file.FullName);
                 Console.WriteLine(fileName);
                 curentFile = System.IO.File.ReadAllLines(file.FullName);
-                count = System.IO.File.ReadAllLines(file.FullName).Length;
-                Console.WriteLine("Файл:\n" + fileName + "\nколичество строк: " + count);
+                linesCount = curentFile.Length;
+                int lineCounter = 0;
+                Console.WriteLine("Файл:\n" + fileName + "\nколичество строк: " + linesCount);
+                
+
+                //определяем итоговое кол-во файлов
+                //fileCount = linesCount / linesQ;
+                //if (linesCount % linesQ > 0)
+                //    fileCount++;
+
+                //try
+                //{
+                //    File.Create(@outFileName);
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine(ex.ToString());
+                //}
+
+                foreach (string line in curentFile)
+                { 
+
+                    buffer[lineCounter] = line;
+                    ++lineCounter;
+                    if ((lineCounter) == linesQ)
+                    {
+                        //if (!File.Exists(@outFileName))
+                        //{
+                        ++outFileNum;
+                        outFileName = dirOUT + "\\" + Path.GetFileNameWithoutExtension(fileName) + "_" + outFileNum + Path.GetExtension(fileName);
+                        File.WriteAllLines(@outFileName, buffer);
+                        Array.Clear(buffer,0,linesQ);
+                        lineCounter = 0;                         
+                        Console.WriteLine("Исходящий файл: " + outFileName);
+                        //}
+
+                    }
+                }
+
+                if ((lineCounter) > 0)
+                {
+                    ++outFileNum;
+                    outFileName = dirOUT + "\\" + Path.GetFileNameWithoutExtension(fileName) + "_" + outFileNum + Path.GetExtension(fileName);
+                    Console.WriteLine("Исходящий файл: " + outFileName);
+                    File.WriteAllLines(@outFileName, buffer);
+                    Array.Clear(buffer, 0, linesQ);
+                    lineCounter = 0;
+                }
 
 
-                //if (Path.GetExtension(fileName) == ".zip")
-                //{
-                //    tmpDir = CreateTempDir();
-                //    tmpUnZipDir = UnzipFileToTempDir(file.FullName);
-                //    FixDir(tmpUnZipDir.FullName, tmpDir.FullName);
-                //    ZipFile.CreateFromDirectory(tmpDir.FullName, @outDir + @"\" + fileName);
-                //    tmpDir.Delete(true);
-                //    tmpUnZipDir.Delete(true);
-                //}
-                //else //Path.GetExtension(fileName) <> ".zip"
-                //{
-                //    fileName = RemoveInvalidFilePathCharacters(fileName, "");
-                //    FixBill(@file.FullName, @outDir + @"\" + fileName);
-                //}
+                    //foreach (string str in curentFile)
+                    //{
+                    //    Console.WriteLine(str);
+                    //}
+
+                    //if (Path.GetExtension(fileName) == ".zip")
+                    //{
+                    //    tmpDir = CreateTempDir();
+                    //    tmpUnZipDir = UnzipFileToTempDir(file.FullName);
+                    //    FixDir(tmpUnZipDir.FullName, tmpDir.FullName);
+                    //    ZipFile.CreateFromDirectory(tmpDir.FullName, @outDir + @"\" + fileName);
+                    //    tmpDir.Delete(true);
+                    //    tmpUnZipDir.Delete(true);
+                    //}
+                    //else //Path.GetExtension(fileName) <> ".zip"
+                    //{
+                    //    fileName = RemoveInvalidFilePathCharacters(fileName, "");
+                    //    FixBill(@file.FullName, @outDir + @"\" + fileName);
+                    //}
             }
 
 
